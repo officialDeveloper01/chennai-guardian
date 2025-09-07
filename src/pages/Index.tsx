@@ -1,11 +1,15 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import HeaderPanel from '@/components/HeaderPanel';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import TopNavigation from '@/components/TopNavigation';
+import LeftSidebar from '@/components/LeftSidebar';
+import RightPanel from '@/components/RightPanel';
 import MapDashboard from '@/components/MapDashboard';
-import MetricsPanel from '@/components/MetricsPanel';
-import SidebarPanel from '@/components/SidebarPanel';
+import Dashboard from '@/pages/Dashboard';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import { useToast } from '@/hooks/use-toast';
+
+// ... keep existing interfaces and data arrays ...
 
 interface Ambulance {
   id: string;
@@ -748,62 +752,175 @@ const Index = () => {
     };
   }, [simulationInterval]);
 
-  return (
-    <div className="h-screen w-full bg-background overflow-hidden">
-      {/* Header */}
-      <HeaderPanel
-        isLoading={isLoading}
-        activeEmergencies={metrics.activeEmergencies}
-        overallTraffic={overallTraffic}
-        onStartSimulation={startSimulation}
-        onStopSimulation={stopSimulation}
-        simulationStarted={simulationStarted}
-      />
+  const MainApp = () => {
+    const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
+    const [hotspots, setHotspots] = useState<Hotspot[]>([]);
+    const [metrics, setMetrics] = useState(initialMetrics);
+    const [isLoading, setIsLoading] = useState(true);
+    const [showHighRiskOnly, setShowHighRiskOnly] = useState(false);
+    const [showTraffic, setShowTraffic] = useState(true);
+    const [simulationStarted, setSimulationStarted] = useState(false);
+    const [selectedAmbulance, setSelectedAmbulance] = useState<Ambulance | null>(null);
+    const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null);
+    const [overallTraffic, setOverallTraffic] = useState<string>('Loading...');
+    const [activeEmergencies, setActiveEmergencies] = useState<Array<{id: string, lat: number, lng: number, hospital: Hospital}>>([]);
+    const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    const { toast } = useToast();
+    const location = useLocation();
 
-      {/* Main Content */}
-      <div className="flex h-[calc(100vh-80px)]">
-        {/* Map Section */}
-        <motion.div 
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex-1 relative"
-        >
-          <MapDashboard
-            ambulances={ambulances}
-            hotspots={hotspots}
-            hospitals={chennaiHospitals}
-            onAmbulanceSelect={handleAmbulanceSelect}
-            onHotspotSelect={handleHotspotSelect}
-            onDispatchAmbulance={handleDispatchAmbulance}
-            selectedAmbulance={selectedAmbulance}
-            showTraffic={showTraffic}
-            showHighRiskOnly={showHighRiskOnly}
-            simulationStarted={simulationStarted}
-            activeEmergencies={activeEmergencies}
-          />
-          
-          {/* Floating Action Button */}
-          <FloatingActionButton
-            showHighRiskOnly={showHighRiskOnly}
-            onToggle={handleToggleFilter}
-          />
-        </motion.div>
+    // ... keep existing functions (calculateDistance, findNearestHospital, etc.) ...
 
-        {/* Sidebar Panel */}
-        <SidebarPanel
-          ambulances={ambulances}
-          hotspots={hotspots}
-          showHighRiskOnly={showHighRiskOnly}
-          onToggleFilter={handleToggleFilter}
-          onAmbulanceSelect={handleAmbulanceSelect}
-          onHotspotSelect={handleHotspotSelect}
-        />
-      </div>
+    // New UI handlers
+    const handleToggleSidebar = () => {
+      setIsSidebarCollapsed(!isSidebarCollapsed);
+    };
+
+    const handleCloseRightPanel = () => {
+      setSelectedAmbulance(null);
+      setSelectedHotspot(null);
+    };
+
+    const handleAmbulanceSelect = useCallback((ambulance: Ambulance) => {
+      setSelectedAmbulance(ambulance);
+      setSelectedHotspot(null);
+    }, []);
+
+    const handleHotspotSelect = useCallback((hotspot: Hotspot) => {
+      setSelectedHotspot(hotspot);
+      setSelectedAmbulance(null);
+    }, []);
+
+    const handleDispatchAmbulance = useCallback((ambulance: Ambulance, emergencyLat?: number, emergencyLng?: number) => {
+      const emergency = emergencyLat && emergencyLng 
+        ? { lat: emergencyLat, lng: emergencyLng }
+        : generateRandomEmergency();
       
-      {/* Bottom Metrics */}
-      <MetricsPanel metrics={metrics} />
-    </div>
+      const nearestHospital = findNearestHospital(emergency.lat, emergency.lng);
+      const distance = calculateDistance(ambulance.lat, ambulance.lng, nearestHospital.lat, nearestHospital.lng);
+      const eta = `${Math.ceil(distance * 2.5)} mins`;
+
+      const updatedAmbulance = {
+        ...ambulance,
+        status: 'Dispatched' as const,
+        eta,
+        hospital: nearestHospital
+      };
+
+      setAmbulances(prev => prev.map(amb => 
+        amb.id === ambulance.id ? updatedAmbulance : amb
+      ));
+
+      setMetrics(prev => ({
+        ...prev,
+        totalDispatches: prev.totalDispatches + 1,
+        activeEmergencies: prev.activeEmergencies + 1,
+        successfulOutcomes: prev.successfulOutcomes + 1
+      }));
+
+      setTimeout(() => {
+        setAmbulances(prev => prev.map(amb => 
+          amb.id === ambulance.id ? { ...amb, status: 'En-route' as const } : amb
+        ));
+      }, 2000);
+
+      setTimeout(() => {
+        setAmbulances(prev => prev.map(amb => 
+          amb.id === ambulance.id ? { ...amb, status: 'Available' as const, eta: undefined, hospital: undefined } : amb
+        ));
+        setMetrics(prev => ({
+          ...prev,
+          activeEmergencies: Math.max(0, prev.activeEmergencies - 1)
+        }));
+      }, 15000);
+
+      toast({
+        title: "🚨 Ambulance Dispatched",
+        description: `${ambulance.id} dispatched to emergency location`,
+      });
+    }, [calculateDistance, findNearestHospital, generateRandomEmergency, toast]);
+
+    const handleToggleFilter = useCallback(() => {
+      setShowHighRiskOnly(!showHighRiskOnly);
+    }, [showHighRiskOnly]);
+
+    // ... keep existing useEffects (fetchTrafficAndAssignAmbulances, cleanup) ...
+
+    return (
+      <div className="h-screen w-full bg-background flex flex-col overflow-hidden">
+        {/* Top Navigation */}
+        <TopNavigation
+          onToggleSidebar={handleToggleSidebar}
+          notifications={activeEmergencies.length}
+          isDark={isDarkMode}
+          onToggleDark={() => setIsDarkMode(!isDarkMode)}
+        />
+
+        {/* Main Layout */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left Sidebar */}
+          <LeftSidebar
+            ambulances={ambulances}
+            isCollapsed={isSidebarCollapsed}
+            onAmbulanceSelect={handleAmbulanceSelect}
+            selectedAmbulance={selectedAmbulance}
+          />
+
+          {/* Main Content Area */}
+          <main className="flex-1 relative overflow-hidden">
+            {location.pathname === '/' && (
+              <>
+                <MapDashboard
+                  ambulances={ambulances}
+                  hotspots={hotspots}
+                  hospitals={chennaiHospitals}
+                  onAmbulanceSelect={handleAmbulanceSelect}
+                  onHotspotSelect={handleHotspotSelect}
+                  onDispatchAmbulance={handleDispatchAmbulance}
+                  selectedAmbulance={selectedAmbulance}
+                  showTraffic={showTraffic}
+                  showHighRiskOnly={showHighRiskOnly}
+                  simulationStarted={simulationStarted}
+                  activeEmergencies={activeEmergencies}
+                />
+                
+                {/* Floating Action Button */}
+                <FloatingActionButton
+                  showHighRiskOnly={showHighRiskOnly}
+                  onToggle={handleToggleFilter}
+                />
+              </>
+            )}
+
+            {location.pathname === '/dashboard' && (
+              <Dashboard
+                metrics={metrics}
+                ambulances={ambulances}
+                hotspots={hotspots}
+              />
+            )}
+          </main>
+
+          {/* Right Panel */}
+          <RightPanel
+            selectedAmbulance={selectedAmbulance}
+            selectedHotspot={selectedHotspot}
+            onClose={handleCloseRightPanel}
+            onDispatch={handleDispatchAmbulance}
+            onSendToPatient={handleDispatchAmbulance}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/*" element={<MainApp />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

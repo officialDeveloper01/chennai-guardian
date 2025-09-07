@@ -6,66 +6,68 @@
 
 @layer base {
   :root {
-    /* Core Medical Theme Colors - Clean & Professional */
+    /* Modern Professional Healthcare Theme */
     --background: 0 0% 100%;
-    --foreground: 210 40% 8%;
+    --foreground: 222 84% 5%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 40% 8%;
+    --card-foreground: 222 84% 5%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 40% 8%;
+    --popover-foreground: 222 84% 5%;
 
-    /* Medical Blue Primary */
-    --primary: 207 90% 54%;
-    --primary-light: 207 90% 61%;
-    --primary-foreground: 0 0% 100%;
+    /* Deep Blue Primary - Professional Medical */
+    --primary: 214 100% 27%;
+    --primary-light: 217 91% 60%;
+    --primary-foreground: 0 0% 98%;
 
-    /* Light Medical Blue Secondary */
-    --secondary: 207 94% 94%;
-    --secondary-dark: 207 73% 84%;
-    --secondary-foreground: 210 40% 8%;
+    /* Light Gray Secondary - Clean Background */
+    --secondary: 220 14% 96%;
+    --secondary-dark: 215 13% 34%;
+    --secondary-foreground: 222 84% 5%;
 
-    /* Medical Green for Available */
-    --success: 142 77% 58%;
-    --success-light: 142 77% 65%;
-    --success-foreground: 0 0% 100%;
+    /* Ambulance Red Accent - Emergency */
+    --accent: 0 84% 60%;
+    --accent-foreground: 0 0% 98%;
 
-    /* Medical Yellow/Orange for Moderate */
-    --warning: 38 92% 50%;
-    --moderate: 38 92% 50%;
-    --moderate-foreground: 0 0% 100%;
+    /* Success Green - Available Status */
+    --success: 142 76% 36%;
+    --success-light: 138 76% 47%;
+    --success-foreground: 0 0% 98%;
 
-    /* Medical Red for Emergency/High Risk */
+    /* Warning Orange - Moderate Status */
+    --warning: 45 93% 47%;
+    --moderate: 25 95% 53%;
+    --moderate-foreground: 0 0% 98%;
+
+    /* Emergency Red - Critical Status */
     --emergency: 0 84% 60%;
-    --emergency-foreground: 0 0% 100%;
+    --emergency-foreground: 0 0% 98%;
 
-    --muted: 210 40% 94%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 40% 98%;
+    --muted-foreground: 215 13% 65%;
 
-    --accent: 195 100% 88%;
-    --accent-foreground: 210 40% 8%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 214 100% 27%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 180 83% 32%;
+    /* Modern Professional Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(214 100% 27%), hsl(217 91% 60%));
+    --gradient-accent: linear-gradient(135deg, hsl(0 84% 60%), hsl(0 72% 51%));
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%), hsl(138 76% 47%));
+    --gradient-secondary: linear-gradient(135deg, hsl(220 14% 96%), hsl(215 13% 34%));
 
-    /* Medical Gradients */
-    --gradient-medical: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-light)));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-dark)));
-    --gradient-emergency: linear-gradient(135deg, hsl(var(--emergency)), hsl(43 96% 56%));
+    /* Professional Shadows */
+    --shadow-elegant: 0 4px 12px hsl(214 100% 27% / 0.08);
+    --shadow-accent: 0 4px 12px hsl(0 84% 60% / 0.1);
+    --shadow-success: 0 4px 12px hsl(142 76% 36% / 0.1);
+    --shadow-card: 0 2px 8px hsl(214 32% 91% / 0.6);
 
-    /* Medical Shadows */
-    --shadow-medical: 0 4px 20px hsl(var(--primary) / 0.15);
-    --shadow-success: 0 4px 20px hsl(var(--success) / 0.15);
-    --shadow-emergency: 0 4px 20px hsl(var(--emergency) / 0.15);
-
-    /* Animation Variables */
-    --transition-medical: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Modern Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --radius: 0.75rem;

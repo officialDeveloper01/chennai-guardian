@@ -556,20 +556,9 @@ const MapDashboard: React.FC<MapDashboardProps> = ({
           </div>
         </div>
       </div>
-
-      <div className="mt-3 pt-3 border-t border-border/40">
-        <h4 className="font-semibold text-sm mb-2 text-foreground">Usage Intensity</h4>
-        <div className="flex items-center gap-1 text-xs">
-          <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-sm"></div>
-          <div className="w-3 h-3 bg-yellow-500 rounded-sm"></div>
-          <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
-          <span className="ml-2 text-muted-foreground">Low → High</span>
-        </div>
         <p className="text-muted-foreground mt-1 text-[10px]">
           Historical ambulance dispatch frequency
         </p>
-      </div>
     </div>
   </motion.div>
 );

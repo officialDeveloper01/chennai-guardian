@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Navigation, Play, Square } from 'lucide-react';
+import { useWeather } from '@/hooks/useWeather';
 
 interface HeaderPanelProps {
   isLoading: boolean;
@@ -21,8 +22,7 @@ const HeaderPanel: React.FC<HeaderPanelProps> = ({
   onStopSimulation,
   simulationStarted
 }) => {
-  const [weather, setWeather] = useState<{ temp: number; icon: string } | null>(null);
-  const [loadingWeather, setLoadingWeather] = useState(true);
+  const { weather, loading: loadingWeather } = useWeather({ city: 'Chennai' });
 
   const getTrafficIcon = (traffic: string) => {
     switch (traffic.toLowerCase()) {
@@ -35,29 +35,6 @@ const HeaderPanel: React.FC<HeaderPanelProps> = ({
     }
   };
 
-  // Fetch weather from OpenWeatherMap
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=Chennai&appid=YOUR_OPENWEATHER_API_KEY&units=metric`
-        );
-        const data = await res.json();
-        setWeather({
-          temp: Math.round(data.main.temp),
-          icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
-        });
-      } catch (err) {
-        console.error("Weather fetch failed:", err);
-      } finally {
-        setLoadingWeather(false);
-      }
-    };
-
-    fetchWeather();
-    const interval = setInterval(fetchWeather, 300000); // refresh every 5 min
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <motion.div
@@ -108,8 +85,9 @@ const HeaderPanel: React.FC<HeaderPanelProps> = ({
                 <span className="text-muted-foreground">Weather: Loading...</span>
               ) : weather ? (
                 <>
-                  <img src={weather.icon} alt="weather" className="h-5 w-5" />
-                  <span className="font-medium">{weather.temp}°C</span>
+                  <span className="text-sm">{weather.icon}</span>
+                  <span className="font-medium">{weather.temperature}°C</span>
+                  <span className="text-xs">{weather.condition}</span>
                 </>
               ) : (
                 <span className="text-muted-foreground">Weather: N/A</span>

@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import HotspotWeather from './HotspotWeather';
 
 interface Ambulance {
   id: string;
@@ -218,6 +219,7 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
                     <div className="flex items-center gap-1">
                       <span className="text-xs">🚦 Speed: {hotspot.currentSpeed} km/h</span>
                     </div>
+                    <HotspotWeather lat={hotspot.lat} lng={hotspot.lng} className="text-xs" />
                     <div className="text-xs">Category: {hotspot.category}</div>
                   </div>
                 </CardContent>

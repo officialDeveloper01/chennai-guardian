@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,8 @@ import {
   Eye,
   Target
 } from 'lucide-react';
+import { useWeather } from '@/hooks/useWeather';
+import HotspotWeather from './HotspotWeather';
 
 interface Hotspot {
   id: string;
@@ -139,12 +141,7 @@ const HotspotPanel: React.FC<HotspotPanelProps> = ({
                   </div>
                 )}
 
-                {hotspot.weather && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{hotspot.weather.icon}</span>
-                    <span>{hotspot.weather.temperature}°C, {hotspot.weather.description}</span>
-                  </div>
-                )}
+                <HotspotWeather lat={hotspot.lat} lng={hotspot.lng} />
 
                 <div className="text-sm text-muted-foreground">
                   <Target className="h-3 w-3 inline mr-1" />

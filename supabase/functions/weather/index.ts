@@ -7,7 +7,8 @@ const OPENWEATHER_API_KEY = Deno.env.get("OPENWEATHER_API_KEY");
 
 serve(async (req) => {
   try {
-    const { city } = await req.json();
+    const body = await req.json();
+    const { city, lat, lng } = body;
 
     if (!OPENWEATHER_API_KEY) {
       return new Response(
@@ -16,7 +17,18 @@ serve(async (req) => {
       );
     }
 
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${OPENWEATHER_API_KEY}&units=metric`;
+    let url: string;
+    if (city) {
+      url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${OPENWEATHER_API_KEY}&units=metric`;
+    } else if (lat && lng) {
+      url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${OPENWEATHER_API_KEY}&units=metric`;
+    } else {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing city or coordinates" }),
+        { status: 400 }
+      );
+    }
+    
     const weatherRes = await fetch(url);
     const weatherData = await weatherRes.json();
 

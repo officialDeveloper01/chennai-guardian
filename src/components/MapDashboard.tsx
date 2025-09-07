@@ -19,6 +19,17 @@ interface Ambulance {
   status: 'Available' | 'On Duty' | 'En-route' | 'Dispatched';
   location: string;
   eta?: string;
+  driver?: string;
+  phone?: string;
+  hospital?: {
+    id: string;
+    name: string;
+    address: string;
+    phone: string;
+    lat: number;
+    lng: number;
+    distance?: string;
+  };
 }
 
 interface Hotspot {
@@ -37,6 +48,8 @@ interface MapDashboardProps {
   hotspots: Hotspot[];
   onAmbulanceSelect: (ambulance: Ambulance) => void;
   onHotspotSelect: (hotspot: Hotspot) => void;
+  onDispatchAmbulance: (ambulance: Ambulance) => void;
+  selectedAmbulance: Ambulance | null;
   showTraffic: boolean;
   showHighRiskOnly: boolean;
   simulationStarted: boolean;
@@ -47,6 +60,8 @@ const MapDashboard: React.FC<MapDashboardProps> = ({
   hotspots,
   onAmbulanceSelect,
   onHotspotSelect,
+  onDispatchAmbulance,
+  selectedAmbulance,
   showTraffic,
   showHighRiskOnly,
   simulationStarted
@@ -291,6 +306,29 @@ const MapDashboard: React.FC<MapDashboardProps> = ({
   >
     {/* Map */}
     <div ref={mapContainerRef} className="h-full w-full" />
+
+    {/* Dispatch Button Overlay */}
+    {selectedAmbulance && selectedAmbulance.status === 'Available' && (
+      <div className="absolute top-4 right-4 z-[9999]">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="bg-card/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-border/60"
+        >
+          <div className="text-center mb-3">
+            <h3 className="font-semibold text-sm mb-1">🚑 {selectedAmbulance.id}</h3>
+            <p className="text-xs text-muted-foreground">{selectedAmbulance.location}</p>
+          </div>
+          <button
+            onClick={() => onDispatchAmbulance(selectedAmbulance)}
+            className="w-full bg-emergency hover:bg-emergency/90 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors"
+          >
+            🚨 Dispatch Ambulance
+          </button>
+        </motion.div>
+      </div>
+    )}
 
     {/* Enhanced Map Legend */}
     <div className="absolute bottom-4 left-4 z-[9999] bg-card/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-border/60 max-w-xs">

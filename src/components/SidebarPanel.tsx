@@ -23,6 +23,15 @@ interface Ambulance {
   eta?: string;
   driver?: string;
   phone?: string;
+  hospital?: {
+    id: string;
+    name: string;
+    address: string;
+    phone: string;
+    lat: number;
+    lng: number;
+    distance?: string;
+  };
 }
 
 interface Hotspot {
@@ -133,6 +142,24 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
                         <Clock className="h-3 w-3" />
                         <span>{ambulance.eta}</span>
                       </div>
+                    )}
+                    
+                    {/* Hospital Details for Dispatched Ambulances */}
+                    {ambulance.hospital && ambulance.status === 'Dispatched' && (
+                      <>
+                        <Separator className="my-2" />
+                        <div className="bg-muted/50 p-2 rounded text-xs space-y-1">
+                          <h4 className="font-semibold text-primary flex items-center gap-1">
+                            🏥 Destination Hospital
+                          </h4>
+                          <div className="space-y-1">
+                            <div><strong>Name:</strong> {ambulance.hospital.name}</div>
+                            <div><strong>Address:</strong> {ambulance.hospital.address}</div>
+                            <div><strong>Phone:</strong> {ambulance.hospital.phone}</div>
+                            <div><strong>Distance:</strong> {ambulance.hospital.distance}</div>
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
                 </CardContent>

@@ -16,6 +16,17 @@ interface Ambulance {
   eta?: string;
   driver?: string;
   phone?: string;
+  hospital?: Hospital;
+}
+
+interface Hospital {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  lat: number;
+  lng: number;
+  distance?: string;
 }
 
 interface Hotspot {
@@ -55,6 +66,50 @@ const chennaiHotspots = [
   { id: 'HOT006', name: 'Airport Road Junction', lat: 12.9897, lng: 80.1693 },
 ];
 
+// Chennai hospital locations
+const chennaiHospitals: Hospital[] = [
+  {
+    id: 'HOSP001',
+    name: 'Apollo Hospital Main',
+    address: 'Greams Road, Thousand Lights, Chennai - 600006',
+    phone: '+91 44 2829 3333',
+    lat: 13.0358,
+    lng: 80.2433
+  },
+  {
+    id: 'HOSP002', 
+    name: 'Fortis Malar Hospital',
+    address: '52, 1st Main Road, Gandhi Nagar, Adyar, Chennai - 600020',
+    phone: '+91 44 4289 8888',
+    lat: 13.0067,
+    lng: 80.2206
+  },
+  {
+    id: 'HOSP003',
+    name: 'MIOT International',
+    address: '4/112, Mount Poonamalle Road, Manapakkam, Chennai - 600089',
+    phone: '+91 44 2249 2288',
+    lat: 13.0475,
+    lng: 80.1854
+  },
+  {
+    id: 'HOSP004',
+    name: 'Gleneagles Global Health City',
+    address: 'Perumbakkam, Chennai - 600100',
+    phone: '+91 44 4444 1000',
+    lat: 12.9165,
+    lng: 80.2282
+  },
+  {
+    id: 'HOSP005',
+    name: 'Stanley Medical College Hospital',
+    address: 'Old Jail Road, Royapuram, Chennai - 600001',
+    phone: '+91 44 2663 0800',
+    lat: 13.1065,
+    lng: 80.2963
+  }
+];
+
 const initialMetrics = {
   averageResponseTime: 8.5,
   activeEmergencies: 0,
@@ -72,8 +127,41 @@ const Index = () => {
   const [showHighRiskOnly, setShowHighRiskOnly] = useState(false);
   const [showTraffic, setShowTraffic] = useState(true);
   const [simulationStarted, setSimulationStarted] = useState(false);
+  const [selectedAmbulance, setSelectedAmbulance] = useState<Ambulance | null>(null);
   const [overallTraffic, setOverallTraffic] = useState<string>('Loading...');
   const { toast } = useToast();
+
+  // Calculate distance between two points (Haversine formula)
+  const calculateDistance = useCallback((lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }, []);
+
+  // Find nearest hospital to a location
+  const findNearestHospital = useCallback((lat: number, lng: number): Hospital => {
+    let nearestHospital = chennaiHospitals[0];
+    let shortestDistance = calculateDistance(lat, lng, nearestHospital.lat, nearestHospital.lng);
+
+    for (const hospital of chennaiHospitals) {
+      const distance = calculateDistance(lat, lng, hospital.lat, hospital.lng);
+      if (distance < shortestDistance) {
+        shortestDistance = distance;
+        nearestHospital = hospital;
+      }
+    }
+
+    return {
+      ...nearestHospital,
+      distance: `${shortestDistance.toFixed(1)} km`
+    };
+  }, [calculateDistance]);
 
   // Fetch traffic data from Google Maps API and assign ambulances to hotspots
   useEffect(() => {
@@ -180,27 +268,28 @@ const Index = () => {
     setIsLoading(true);
     
     try {
-      // Use Google Places API to find nearest hospital (simulated for now)
-      const nearestHospital = {
-        name: 'Apollo Hospital Chennai',
-        lat: 13.0358,
-        lng: 80.2433,
-        distance: '2.5 km'
-      };
+      // Find nearest hospital to the ambulance location
+      const nearestHospital = findNearestHospital(ambulance.lat, ambulance.lng);
+      
+      // Calculate ETA based on distance (assuming average city speed of 20 km/h)
+      const distanceKm = parseFloat(nearestHospital.distance!.replace(' km', ''));
+      const estimatedTime = Math.max(Math.round((distanceKm / 20) * 60), 3); // Minimum 3 minutes
 
-      // Update ambulance status
+      // Update ambulance status with hospital info
       const updatedAmbulances = ambulances.map(amb =>
         amb.id === ambulance.id
           ? { 
               ...amb, 
               status: 'Dispatched' as const, 
-              eta: `${Math.floor(Math.random() * 15) + 5} min to ${nearestHospital.name}`,
-              location: `En-route to ${nearestHospital.name}`
+              eta: `${estimatedTime} min to ${nearestHospital.name}`,
+              location: `En-route to ${nearestHospital.name}`,
+              hospital: nearestHospital
             }
           : amb
       );
 
       setAmbulances(updatedAmbulances);
+      setSelectedAmbulance(null); // Clear selection after dispatch
       setMetrics(prev => ({
         ...prev,
         activeEmergencies: prev.activeEmergencies + 1,
@@ -208,9 +297,23 @@ const Index = () => {
         successfulOutcomes: prev.successfulOutcomes + 1
       }));
 
+      // Simulate ambulance movement towards hospital
+      setTimeout(() => {
+        setAmbulances(prev => prev.map(amb => 
+          amb.id === ambulance.id
+            ? { 
+                ...amb, 
+                lat: nearestHospital.lat + (Math.random() - 0.5) * 0.001,
+                lng: nearestHospital.lng + (Math.random() - 0.5) * 0.001,
+                status: 'En-route' as const
+              }
+            : amb
+        ));
+      }, 2000);
+
       toast({
         title: "🚑 Ambulance Dispatched",
-        description: `${ambulance.id} dispatched to ${nearestHospital.name}`,
+        description: `${ambulance.id} dispatched to ${nearestHospital.name} (ETA: ${estimatedTime} min)`,
       });
     } catch (error) {
       console.error('Error dispatching ambulance:', error);
@@ -222,9 +325,10 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, ambulances, toast]);
+  }, [isLoading, ambulances, toast, findNearestHospital]);
 
   const handleAmbulanceSelect = useCallback((ambulance: Ambulance) => {
+    setSelectedAmbulance(ambulance);
     toast({
       title: `🚑 ${ambulance.id} Selected`,
       description: `Status: ${ambulance.status} • Location: ${ambulance.location}`,
@@ -269,6 +373,8 @@ const Index = () => {
             hotspots={hotspots}
             onAmbulanceSelect={handleAmbulanceSelect}
             onHotspotSelect={handleHotspotSelect}
+            onDispatchAmbulance={handleDispatchAmbulance}
+            selectedAmbulance={selectedAmbulance}
             showTraffic={showTraffic}
             showHighRiskOnly={showHighRiskOnly}
             simulationStarted={simulationStarted}

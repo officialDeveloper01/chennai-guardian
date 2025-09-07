@@ -46,6 +46,15 @@ interface Hotspot {
 interface MapDashboardProps {
   ambulances: Ambulance[];
   hotspots: Hotspot[];
+  hospitals: Array<{
+    id: string;
+    name: string;
+    address: string;
+    phone: string;
+    lat: number;
+    lng: number;
+    distance?: string;
+  }>;
   onAmbulanceSelect: (ambulance: Ambulance) => void;
   onHotspotSelect: (hotspot: Hotspot) => void;
   onDispatchAmbulance: (ambulance: Ambulance) => void;
@@ -59,6 +68,7 @@ interface MapDashboardProps {
 const MapDashboard: React.FC<MapDashboardProps> = ({
   ambulances,
   hotspots,
+  hospitals,
   onAmbulanceSelect,
   onHotspotSelect,
   onDispatchAmbulance,
@@ -75,6 +85,7 @@ const MapDashboard: React.FC<MapDashboardProps> = ({
   const hotspotCirclesRef = useRef<Map<string, L.Circle>>(new Map());
   const emergencyMarkersRef = useRef<Map<string, L.Marker>>(new Map());
   const routeLinesRef = useRef<Map<string, L.Polyline>>(new Map());
+  const hospitalMarkersRef = useRef<Map<string, L.Marker>>(new Map());
 
   // Chennai coordinates
   const chennaiCenter: [number, number] = [13.0827, 80.2707];
@@ -301,6 +312,72 @@ const MapDashboard: React.FC<MapDashboardProps> = ({
     });
   }, [hotspots, onHotspotSelect, showHighRiskOnly, simulationStarted]);
 
+  // Update hospital markers
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    // Clear existing hospital markers
+    hospitalMarkersRef.current.forEach(marker => {
+      mapRef.current?.removeLayer(marker);
+    });
+    hospitalMarkersRef.current.clear();
+
+    // Add hospital markers
+    hospitals.forEach(hospital => {
+      const isGovernment = hospital.name.toLowerCase().includes('government') || 
+                          hospital.name.toLowerCase().includes('stanley') ||
+                          hospital.name.toLowerCase().includes('kilpauk');
+      
+      const hospitalIcon = L.divIcon({
+        html: `
+          <div style="
+            width: 28px;
+            height: 28px;
+            background: ${isGovernment ? '#059669' : '#0891b2'};
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            font-size: 14px;
+          ">
+            🏥
+          </div>
+        `,
+        className: 'hospital-marker',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+      });
+
+      const marker = L.marker([hospital.lat, hospital.lng], { icon: hospitalIcon })
+        .bindPopup(`
+          <div class="hospital-popup">
+            <h3 style="margin: 0 0 8px 0; color: #0f766e; font-weight: 600;">
+              🏥 ${hospital.name}
+            </h3>
+            <p style="margin: 4px 0; color: #374151; font-size: 12px;">
+              <strong>Type:</strong> 
+              <span style="color: ${isGovernment ? '#059669' : '#0891b2'}; font-weight: 600;">
+                ${isGovernment ? 'Government Hospital' : 'Private Hospital'}
+              </span>
+            </p>
+            <p style="margin: 4px 0; color: #374151; font-size: 12px;">
+              <strong>Address:</strong> ${hospital.address}
+            </p>
+            <p style="margin: 4px 0; color: #374151; font-size: 12px;">
+              <strong>Phone:</strong> ${hospital.phone}
+            </p>
+          </div>
+        `);
+
+      if (mapRef.current) {
+        marker.addTo(mapRef.current);
+        hospitalMarkersRef.current.set(hospital.id, marker);
+      }
+    });
+  }, [hospitals]);
+
   // Update emergency markers and route lines
   useEffect(() => {
     if (!mapRef.current) return;
@@ -462,6 +539,20 @@ const MapDashboard: React.FC<MapDashboardProps> = ({
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-emergency rounded-full border border-white shadow-sm"></div>
             <span className="text-muted-foreground">🔴 High Risk</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 pt-3 border-t border-border/40">
+        <h4 className="font-semibold text-sm mb-2 text-foreground">Hospitals</h4>
+        <div className="space-y-2 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-emerald-600 rounded-full border border-white shadow-sm"></div>
+            <span className="text-muted-foreground">🏥 Government</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-sky-600 rounded-full border border-white shadow-sm"></div>
+            <span className="text-muted-foreground">🏥 Private</span>
           </div>
         </div>
       </div>

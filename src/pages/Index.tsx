@@ -42,34 +42,154 @@ interface Hotspot {
   currentSpeed: number;
 }
 
-// Static ambulance fleet data
+// Static ambulance fleet data - Expanded for city-wide coverage
 const ambulanceFleet = [
+  // Central Chennai Fleet
   { id: 'AMB001', driver: 'Raj Kumar', phone: '+91 98765 43210' },
   { id: 'AMB002', driver: 'Priya Sharma', phone: '+91 98765 43211' },
   { id: 'AMB003', driver: 'Kumar Singh', phone: '+91 98765 43212' },
   { id: 'AMB004', driver: 'Deepak Raj', phone: '+91 98765 43213' },
   { id: 'AMB005', driver: 'Sita Devi', phone: '+91 98765 43214' },
+  
+  // South Chennai Fleet
   { id: 'AMB006', driver: 'Suresh Kumar', phone: '+91 98765 43215' },
   { id: 'AMB007', driver: 'Anjali Reddy', phone: '+91 98765 43216' },
   { id: 'AMB008', driver: 'Vikram Patel', phone: '+91 98765 43217' },
   { id: 'AMB009', driver: 'Lakshmi Nair', phone: '+91 98765 43218' },
-  { id: 'AMB010', driver: 'Ravi Shankar', phone: '+91 98765 43219' }, 
+  { id: 'AMB010', driver: 'Ravi Shankar', phone: '+91 98765 43219' },
+  
+  // West Chennai Fleet
+  { id: 'AMB011', driver: 'Muthu Selvam', phone: '+91 98765 43220' },
+  { id: 'AMB012', driver: 'Kavitha Devi', phone: '+91 98765 43221' },
+  { id: 'AMB013', driver: 'Arun Kumar', phone: '+91 98765 43222' },
+  { id: 'AMB014', driver: 'Meena Kumari', phone: '+91 98765 43223' },
+  { id: 'AMB015', driver: 'Ganesh Babu', phone: '+91 98765 43224' },
+  
+  // North Chennai Fleet
+  { id: 'AMB016', driver: 'Senthil Kumar', phone: '+91 98765 43225' },
+  { id: 'AMB017', driver: 'Radha Krishnan', phone: '+91 98765 43226' },
+  { id: 'AMB018', driver: 'Vijay Anand', phone: '+91 98765 43227' },
+  { id: 'AMB019', driver: 'Shanti Devi', phone: '+91 98765 43228' },
+  { id: 'AMB020', driver: 'Bala Murugan', phone: '+91 98765 43229' },
+  
+  // East Chennai Fleet  
+  { id: 'AMB021', driver: 'Karthik Raja', phone: '+91 98765 43230' },
+  { id: 'AMB022', driver: 'Sowmya Priya', phone: '+91 98765 43231' },
+  { id: 'AMB023', driver: 'Manoj Kumar', phone: '+91 98765 43232' },
+  { id: 'AMB024', driver: 'Sangeetha Rani', phone: '+91 98765 43233' },
+  { id: 'AMB025', driver: 'Rajesh Kumar', phone: '+91 98765 43234' },
+  
+  // Peripheral Areas Fleet
+  { id: 'AMB026', driver: 'Arjun Prasad', phone: '+91 98765 43235' },
+  { id: 'AMB027', driver: 'Divya Bharathi', phone: '+91 98765 43236' },
+  { id: 'AMB028', driver: 'Naveen Kumar', phone: '+91 98765 43237' },
+  { id: 'AMB029', driver: 'Saranya Devi', phone: '+91 98765 43238' },
+  { id: 'AMB030', driver: 'Harish Babu', phone: '+91 98765 43239' },
+  
+  // Backup Fleet
+  { id: 'AMB031', driver: 'Ramesh Kannan', phone: '+91 98765 43240' },
+  { id: 'AMB032', driver: 'Geetha Lakshmi', phone: '+91 98765 43241' },
+  { id: 'AMB033', driver: 'Suresh Babu', phone: '+91 98765 43242' },
+  { id: 'AMB034', driver: 'Revathi Devi', phone: '+91 98765 43243' },
+  { id: 'AMB035', driver: 'Mahesh Kumar', phone: '+91 98765 43244' },
 ];
 
-// Chennai hotspot locations
+// Chennai hotspot locations - Expanded city-wide coverage
 const chennaiHotspots = [
+  // Central Chennai
   { id: 'HOT001', name: 'T. Nagar Commercial District', lat: 13.0417, lng: 80.2341 },
   { id: 'HOT002', name: 'Anna Nagar Roundabout', lat: 13.085, lng: 80.2101 },
-  { id: 'HOT003', name: 'Velachery Main Road', lat: 13.0067, lng: 80.2206 },
-  { id: 'HOT004', name: 'OMR IT Corridor', lat: 12.9698, lng: 80.2282 },
-  { id: 'HOT005', name: 'Central Railway Station Area', lat: 13.0878, lng: 80.2785 },
-  { id: 'HOT006', name: 'Airport Road Junction', lat: 12.9897, lng: 80.1693 },
+  { id: 'HOT003', name: 'Central Railway Station Area', lat: 13.0878, lng: 80.2785 },
+  { id: 'HOT004', name: 'Egmore Junction', lat: 13.0732, lng: 80.2609 },
+  { id: 'HOT005', name: 'Thousand Lights Metro Station', lat: 13.0607, lng: 80.2498 },
+  
+  // South Chennai
+  { id: 'HOT006', name: 'Velachery Main Road', lat: 13.0067, lng: 80.2206 },
+  { id: 'HOT007', name: 'Adyar Signal', lat: 13.0067, lng: 80.2574 },
+  { id: 'HOT008', name: 'Guindy Industrial Estate', lat: 13.0067, lng: 80.2206 },
+  { id: 'HOT009', name: 'Tambaram Railway Station', lat: 12.9249, lng: 80.1000 },
+  { id: 'HOT010', name: 'Chrompet Bus Stand', lat: 12.9516, lng: 80.1462 },
+  
+  // West Chennai
+  { id: 'HOT011', name: 'Koyambedu Bus Terminal', lat: 13.0698, lng: 80.1943 },
+  { id: 'HOT012', name: 'Vadapalani Metro Station', lat: 13.0504, lng: 80.2126 },
+  { id: 'HOT013', name: 'Porur Junction', lat: 13.0378, lng: 80.1462 },
+  { id: 'HOT014', name: 'Poonamallee High Road', lat: 13.0504, lng: 80.1815 },
+  
+  // North Chennai  
+  { id: 'HOT015', name: 'Washermanpet Industrial Area', lat: 13.1143, lng: 80.2963 },
+  { id: 'HOT016', name: 'Perambur Barracks Road', lat: 13.1143, lng: 80.2340 },
+  { id: 'HOT017', name: 'Ennore Port Area', lat: 13.2846, lng: 80.3222 },
+  { id: 'HOT018', name: 'Manali Industrial Zone', lat: 13.1674, lng: 80.2963 },
+  
+  // East Chennai
+  { id: 'HOT019', name: 'OMR IT Corridor Thoraipakkam', lat: 12.9698, lng: 80.2282 },
+  { id: 'HOT020', name: 'Kelambakkam IT Hub', lat: 12.8449, lng: 80.1462 },
+  { id: 'HOT021', name: 'Sholinganallur Junction', lat: 12.9016, lng: 80.2274 },
+  { id: 'HOT022', name: 'Thiruvanmiyur Beach Road', lat: 12.9816, lng: 80.2574 },
+  
+  // Peripheral Areas
+  { id: 'HOT023', name: 'Airport Road Junction', lat: 12.9897, lng: 80.1693 },
+  { id: 'HOT024', name: 'GST Road Pallavaram', lat: 12.9675, lng: 80.1491 },
+  { id: 'HOT025', name: 'ECR Mahabalipuram Road', lat: 12.7934, lng: 80.2274 },
+  { id: 'HOT026', name: 'Avadi Military Station', lat: 13.1143, lng: 79.9073 },
 ];
 
-// Chennai hospital locations
+// Chennai hospital locations - Expanded with government hospitals
 const chennaiHospitals: Hospital[] = [
+  // Government Hospitals
   {
     id: 'HOSP001',
+    name: 'Government General Hospital (MMC)',
+    address: 'Park Town, Chennai - 600003',
+    phone: '+91 44 2819 2231',
+    lat: 13.0878,
+    lng: 80.2785
+  },
+  {
+    id: 'HOSP002',
+    name: 'Stanley Medical College Hospital',
+    address: 'Old Jail Road, Royapuram, Chennai - 600001',
+    phone: '+91 44 2663 0800',
+    lat: 13.1065,
+    lng: 80.2963
+  },
+  {
+    id: 'HOSP003',
+    name: 'Kilpauk Medical College Hospital',
+    address: 'Kilpauk Garden Road, Chennai - 600010',
+    phone: '+91 44 2644 4500',
+    lat: 13.0827,
+    lng: 80.2340
+  },
+  {
+    id: 'HOSP004',
+    name: 'Government Royapettah Hospital',
+    address: 'Royapettah, Chennai - 600014',
+    phone: '+91 44 2847 1616',
+    lat: 13.0520,
+    lng: 80.2574
+  },
+  {
+    id: 'HOSP005',
+    name: 'Government Hospital Chrompet',
+    address: 'GST Road, Chrompet, Chennai - 600044',
+    phone: '+91 44 2226 5432',
+    lat: 12.9516,
+    lng: 80.1462
+  },
+  {
+    id: 'HOSP006',
+    name: 'Government Hospital Tambaram',
+    address: 'Tambaram Sanatorium, Chennai - 600047',
+    phone: '+91 44 2226 1234',
+    lat: 12.9249,
+    lng: 80.1000
+  },
+  
+  // Major Private Hospitals
+  {
+    id: 'HOSP007',
     name: 'Apollo Hospital Main',
     address: 'Greams Road, Thousand Lights, Chennai - 600006',
     phone: '+91 44 2829 3333',
@@ -77,7 +197,7 @@ const chennaiHospitals: Hospital[] = [
     lng: 80.2433
   },
   {
-    id: 'HOSP002', 
+    id: 'HOSP008', 
     name: 'Fortis Malar Hospital',
     address: '52, 1st Main Road, Gandhi Nagar, Adyar, Chennai - 600020',
     phone: '+91 44 4289 8888',
@@ -85,7 +205,7 @@ const chennaiHospitals: Hospital[] = [
     lng: 80.2206
   },
   {
-    id: 'HOSP003',
+    id: 'HOSP009',
     name: 'MIOT International',
     address: '4/112, Mount Poonamalle Road, Manapakkam, Chennai - 600089',
     phone: '+91 44 2249 2288',
@@ -93,7 +213,7 @@ const chennaiHospitals: Hospital[] = [
     lng: 80.1854
   },
   {
-    id: 'HOSP004',
+    id: 'HOSP010',
     name: 'Gleneagles Global Health City',
     address: 'Perumbakkam, Chennai - 600100',
     phone: '+91 44 4444 1000',
@@ -101,12 +221,44 @@ const chennaiHospitals: Hospital[] = [
     lng: 80.2282
   },
   {
-    id: 'HOSP005',
-    name: 'Stanley Medical College Hospital',
-    address: 'Old Jail Road, Royapuram, Chennai - 600001',
-    phone: '+91 44 2663 0800',
-    lat: 13.1065,
-    lng: 80.2963
+    id: 'HOSP011',
+    name: 'Apollo Specialty Hospital Vanagaram',
+    address: 'Vanagaram, Chennai - 600095',
+    phone: '+91 44 3044 4444',
+    lat: 13.1143,
+    lng: 80.1815
+  },
+  {
+    id: 'HOSP012',
+    name: 'Vijaya Hospital',
+    address: 'Vadapalani, Chennai - 600026',
+    phone: '+91 44 2471 9001',
+    lat: 13.0504,
+    lng: 80.2126
+  },
+  {
+    id: 'HOSP013',
+    name: 'Sankara Nethralaya',
+    address: 'Nungambakkam, Chennai - 600034',
+    phone: '+91 44 2827 1616',
+    lat: 13.0607,
+    lng: 80.2340
+  },
+  {
+    id: 'HOSP014',
+    name: 'SRM Hospital Kattankulathur',
+    address: 'SRM Nagar, Kattankulathur - 603203',
+    phone: '+91 44 4743 9999',
+    lat: 12.8249,
+    lng: 80.0440
+  },
+  {
+    id: 'HOSP015',
+    name: 'Government Hospital Ennore',
+    address: 'Ennore, Chennai - 600057',
+    phone: '+91 44 2576 5432',
+    lat: 13.2846,
+    lng: 80.3222
   }
 ];
 
@@ -184,18 +336,30 @@ const Index = () => {
     return nearestAmbulance;
   }, [ambulances, calculateDistance]);
 
-  // Generate random emergency location in Chennai
+  // Generate random emergency location in Chennai with hotspot bias
   const generateRandomEmergency = useCallback(() => {
     const chennaiArea = {
-      minLat: 12.9, maxLat: 13.2,
-      minLng: 80.1, maxLng: 80.35
+      minLat: 12.8, maxLat: 13.25,
+      minLng: 80.0, maxLng: 80.35
     };
     
-    const lat = chennaiArea.minLat + Math.random() * (chennaiArea.maxLat - chennaiArea.minLat);
-    const lng = chennaiArea.minLng + Math.random() * (chennaiArea.maxLng - chennaiArea.minLng);
-    
-    return { lat, lng };
-  }, []);
+    // 70% chance of emergency near a hotspot, 30% random
+    if (Math.random() < 0.7 && hotspots.length > 0) {
+      // Choose a random hotspot and add some variation
+      const hotspot = hotspots[Math.floor(Math.random() * hotspots.length)];
+      const offsetRange = hotspot.category === 'high' ? 0.008 : 0.012; // High-risk areas have tighter clustering
+      
+      return {
+        lat: hotspot.lat + (Math.random() - 0.5) * offsetRange,
+        lng: hotspot.lng + (Math.random() - 0.5) * offsetRange
+      };
+    } else {
+      // Random location in Chennai
+      const lat = chennaiArea.minLat + Math.random() * (chennaiArea.maxLat - chennaiArea.minLat);
+      const lng = chennaiArea.minLng + Math.random() * (chennaiArea.maxLng - chennaiArea.minLng);
+      return { lat, lng };
+    }
+  }, [hotspots]);
 
   // Start emergency simulation
   const startSimulation = useCallback(() => {
@@ -305,13 +469,13 @@ const Index = () => {
         let ambulanceIndex = 0;
 
         hotspotsWithTraffic.forEach((hotspot, index) => {
-          // Assign at least 1 ambulance per hotspot, more for high traffic areas
+          // Assign ambulances based on category and strategic distribution
           const ambulancesNeeded = hotspot.category === 'high' ? 2 : 1;
           
           for (let i = 0; i < ambulancesNeeded && ambulanceIndex < ambulanceFleet.length; i++) {
             const fleet = ambulanceFleet[ambulanceIndex];
-            const offsetLat = (Math.random() - 0.5) * 0.01; // Small random offset
-            const offsetLng = (Math.random() - 0.5) * 0.01;
+            const offsetLat = (Math.random() - 0.5) * 0.008; // Slightly smaller offset for better coverage
+            const offsetLng = (Math.random() - 0.5) * 0.008;
             
             assignedAmbulances.push({
               id: fleet.id,
@@ -327,11 +491,37 @@ const Index = () => {
           }
         });
 
+        // If we still have ambulances left, distribute them strategically near hospitals
+        if (ambulanceIndex < ambulanceFleet.length) {
+          const remainingAmbulances = ambulanceFleet.slice(ambulanceIndex);
+          const governmentHospitals = chennaiHospitals.filter(h => 
+            h.name.toLowerCase().includes('government') || 
+            h.name.toLowerCase().includes('stanley') ||
+            h.name.toLowerCase().includes('kilpauk')
+          );
+          
+          remainingAmbulances.forEach((fleet, idx) => {
+            const hospital = governmentHospitals[idx % governmentHospitals.length];
+            const offsetLat = (Math.random() - 0.5) * 0.005;
+            const offsetLng = (Math.random() - 0.5) * 0.005;
+            
+            assignedAmbulances.push({
+              id: fleet.id,
+              lat: hospital.lat + offsetLat,
+              lng: hospital.lng + offsetLng,
+              status: 'Available',
+              location: `Standby near ${hospital.name}`,
+              driver: fleet.driver,
+              phone: fleet.phone
+            });
+          });
+        }
+
         setAmbulances(assignedAmbulances);
 
         toast({
-          title: "🔄 Traffic Data Updated",
-          description: `Traffic: ${overallTraffic === 'Loading...' ? 'Moderate' : overallTraffic} • ${assignedAmbulances.length} ambulances assigned`,
+          title: "🔄 Chennai-wide Coverage Active",
+          description: `Traffic: ${overallTraffic === 'Loading...' ? 'Moderate' : overallTraffic} • ${assignedAmbulances.length} ambulances deployed across ${hotspotsWithTraffic.length} zones • ${chennaiHospitals.length} hospitals integrated`,
         });
 
       } catch (error) {
@@ -582,6 +772,7 @@ const Index = () => {
           <MapDashboard
             ambulances={ambulances}
             hotspots={hotspots}
+            hospitals={chennaiHospitals}
             onAmbulanceSelect={handleAmbulanceSelect}
             onHotspotSelect={handleHotspotSelect}
             onDispatchAmbulance={handleDispatchAmbulance}

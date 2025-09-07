@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import HeaderPanel from '@/components/HeaderPanel';
-import GoogleMap from '@/components/GoogleMap';
+import MapDashboard from '@/components/MapDashboard';
 import MetricsPanel from '@/components/MetricsPanel';
 import SidebarPanel from '@/components/SidebarPanel';
 import FloatingActionButton from '@/components/FloatingActionButton';
@@ -23,9 +23,12 @@ interface Hotspot {
   name: string;
   lat: number;
   lng: number;
+  intensity: number;
+  prediction: string;
+  trend?: 'rising' | 'stable' | 'declining';
+  category: 'moderate' | 'high';
   trafficLevel: 'light' | 'moderate' | 'heavy';
   currentSpeed: number;
-  category: 'moderate' | 'high';
 }
 
 // Static ambulance fleet data
@@ -67,6 +70,8 @@ const Index = () => {
   const [metrics, setMetrics] = useState(initialMetrics);
   const [isLoading, setIsLoading] = useState(true);
   const [showHighRiskOnly, setShowHighRiskOnly] = useState(false);
+  const [showTraffic, setShowTraffic] = useState(true);
+  const [simulationStarted, setSimulationStarted] = useState(false);
   const [overallTraffic, setOverallTraffic] = useState<string>('Loading...');
   const { toast } = useToast();
 
@@ -89,7 +94,12 @@ const Index = () => {
             ...hotspot,
             trafficLevel,
             currentSpeed: Math.floor(currentSpeed),
-            category: trafficLevel === 'heavy' ? 'high' : 'moderate'
+            category: trafficLevel === 'heavy' ? 'high' : 'moderate',
+            intensity: Math.random() * 0.8 + 0.2, // 0.2 to 1.0
+            prediction: trafficLevel === 'heavy' 
+              ? 'High ambulance demand predicted based on traffic patterns'
+              : 'Moderate demand area with steady traffic flow',
+            trend: Math.random() > 0.6 ? 'rising' : Math.random() > 0.3 ? 'stable' : 'declining'
           } as Hotspot;
         });
 
@@ -254,12 +264,14 @@ const Index = () => {
           transition={{ duration: 0.6 }}
           className="flex-1 relative"
         >
-          <GoogleMap
+          <MapDashboard
             ambulances={ambulances}
             hotspots={hotspots}
             onAmbulanceSelect={handleAmbulanceSelect}
             onHotspotSelect={handleHotspotSelect}
-            onDispatchAmbulance={handleDispatchAmbulance}
+            showTraffic={showTraffic}
+            showHighRiskOnly={showHighRiskOnly}
+            simulationStarted={simulationStarted}
           />
           
           {/* Floating Action Button */}
@@ -268,6 +280,16 @@ const Index = () => {
             onToggle={handleToggleFilter}
           />
         </motion.div>
+
+        {/* Sidebar Panel */}
+        <SidebarPanel
+          ambulances={ambulances}
+          hotspots={hotspots}
+          showHighRiskOnly={showHighRiskOnly}
+          onToggleFilter={handleToggleFilter}
+          onAmbulanceSelect={handleAmbulanceSelect}
+          onHotspotSelect={handleHotspotSelect}
+        />
       </div>
       
       {/* Bottom Metrics */}

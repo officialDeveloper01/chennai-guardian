@@ -53,7 +53,6 @@ interface MapDashboardProps {
   showTraffic: boolean;
   showHighRiskOnly: boolean;
   simulationStarted: boolean;
-  activeEmergencies: Array<{id: string, lat: number, lng: number, hospital: any}>;
 }
 
 const MapDashboard: React.FC<MapDashboardProps> = ({
@@ -65,16 +64,13 @@ const MapDashboard: React.FC<MapDashboardProps> = ({
   selectedAmbulance,
   showTraffic,
   showHighRiskOnly,
-  simulationStarted,
-  activeEmergencies
+  simulationStarted
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const ambulanceMarkersRef = useRef<Map<string, L.Marker>>(new Map());
   const heatmapLayerRef = useRef<any>(null);
   const hotspotCirclesRef = useRef<Map<string, L.Circle>>(new Map());
-  const emergencyMarkersRef = useRef<Map<string, L.Marker>>(new Map());
-  const routeLinesRef = useRef<Map<string, L.Polyline>>(new Map());
 
   // Chennai coordinates
   const chennaiCenter: [number, number] = [13.0827, 80.2707];
@@ -300,106 +296,6 @@ const MapDashboard: React.FC<MapDashboardProps> = ({
       }
     });
   }, [hotspots, onHotspotSelect, showHighRiskOnly, simulationStarted]);
-
-  // Update emergency markers and route lines
-  useEffect(() => {
-    if (!mapRef.current) return;
-
-    // Clear existing emergency markers and routes
-    emergencyMarkersRef.current.forEach(marker => {
-      mapRef.current?.removeLayer(marker);
-    });
-    emergencyMarkersRef.current.clear();
-
-    routeLinesRef.current.forEach(line => {
-      mapRef.current?.removeLayer(line);
-    });
-    routeLinesRef.current.clear();
-
-    // Add emergency markers
-    activeEmergencies.forEach(emergency => {
-      const emergencyIcon = L.divIcon({
-        html: `
-          <div style="
-            width: 24px;
-            height: 24px;
-            background: #dc2626;
-            border: 2px solid white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(220,38,38,0.4);
-            animation: pulse 2s infinite;
-            font-size: 12px;
-          ">
-            🚨
-          </div>
-        `,
-        className: 'emergency-marker',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      });
-
-      const marker = L.marker([emergency.lat, emergency.lng], { icon: emergencyIcon })
-        .bindPopup(`
-          <div style="text-align: center;">
-            <h4 style="margin: 0 0 8px 0; color: #dc2626; font-weight: 600;">
-              🚨 Emergency Alert
-            </h4>
-            <p style="margin: 4px 0; color: #374151;">
-              <strong>Location:</strong> ${emergency.lat.toFixed(4)}, ${emergency.lng.toFixed(4)}
-            </p>
-            <p style="margin: 4px 0; color: #374151;">
-              <strong>Target Hospital:</strong> ${emergency.hospital?.name || 'Unknown'}
-            </p>
-          </div>
-        `);
-
-      if (mapRef.current) {
-        marker.addTo(mapRef.current);
-        emergencyMarkersRef.current.set(emergency.id, marker);
-      }
-    });
-
-    // Add route lines for dispatched ambulances
-    ambulances
-      .filter(ambulance => ambulance.status === 'Dispatched' || ambulance.status === 'En-route')
-      .forEach(ambulance => {
-        if (ambulance.hospital) {
-          const routeCoords: [number, number][] = [
-            [ambulance.lat, ambulance.lng],
-            [ambulance.hospital.lat, ambulance.hospital.lng]
-          ];
-
-          const routeLine = L.polyline(routeCoords, {
-            color: ambulance.status === 'Dispatched' ? '#3b82f6' : '#f59e0b',
-            weight: 4,
-            opacity: 0.8,
-            dashArray: ambulance.status === 'Dispatched' ? '10, 5' : undefined,
-            className: 'ambulance-route'
-          }).bindPopup(`
-            <div>
-              <h4 style="margin: 0 0 8px 0; color: #0f766e;">🚑 ${ambulance.id} Route</h4>
-              <p style="margin: 4px 0; color: #374151;">
-                Status: <strong>${ambulance.status}</strong>
-              </p>
-              <p style="margin: 4px 0; color: #374151;">
-                Destination: <strong>${ambulance.hospital.name}</strong>
-              </p>
-              <p style="margin: 4px 0; color: #374151;">
-                ETA: <strong>${ambulance.eta || 'Calculating...'}</strong>
-              </p>
-            </div>
-          `);
-
-          if (mapRef.current) {
-            routeLine.addTo(mapRef.current);
-            routeLinesRef.current.set(ambulance.id, routeLine);
-          }
-        }
-      });
-  }, [activeEmergencies, ambulances]);
 
   return (
   <motion.div

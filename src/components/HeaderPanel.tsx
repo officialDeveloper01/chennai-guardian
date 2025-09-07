@@ -1,25 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { MapPin, Navigation, Play, Square } from 'lucide-react';
+import { MapPin, Navigation } from 'lucide-react';
 
 interface HeaderPanelProps {
   isLoading: boolean;
   activeEmergencies: number;
   overallTraffic: string;
-  onStartSimulation: () => void;
-  onStopSimulation: () => void;
-  simulationStarted: boolean;
 }
 
 const HeaderPanel: React.FC<HeaderPanelProps> = ({
   isLoading,
   activeEmergencies,
-  overallTraffic,
-  onStartSimulation,
-  onStopSimulation,
-  simulationStarted
+  overallTraffic
 }) => {
   const [weather, setWeather] = useState<{ temp: number; icon: string } | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
@@ -119,37 +112,6 @@ const HeaderPanel: React.FC<HeaderPanelProps> = ({
 
           {/* Emergencies Badge */}
           <div className="flex items-center gap-3">
-            {/* Simulation Controls */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex items-center gap-2"
-            >
-              {!simulationStarted ? (
-                <Button
-                  onClick={onStartSimulation}
-                  variant="default"
-                  size="sm"
-                  className="bg-emergency hover:bg-emergency/90 text-white"
-                  disabled={isLoading}
-                >
-                  <Play className="h-4 w-4 mr-2" />
-                  Start Simulation
-                </Button>
-              ) : (
-                <Button
-                  onClick={onStopSimulation}
-                  variant="destructive"
-                  size="sm"
-                  disabled={isLoading}
-                >
-                  <Square className="h-4 w-4 mr-2" />
-                  Stop Simulation
-                </Button>
-              )}
-            </motion.div>
-
             {activeEmergencies > 0 && (
               <motion.div
                 initial={{ scale: 0 }}

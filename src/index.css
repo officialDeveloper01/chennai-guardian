@@ -163,6 +163,43 @@
       transform: translateX(-2px) rotate(-1deg);
     }
   }
+
+  /* Emergency Simulation Animations */
+  @keyframes emergency-pulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 2px 8px rgba(220,38,38,0.4);
+    }
+    50% {
+      transform: scale(1.1);
+      box-shadow: 0 4px 16px rgba(220,38,38,0.6);
+    }
+  }
+
+  @keyframes ambulance-dispatch {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes route-fade {
+    from {
+      opacity: 0;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+    }
+    to {
+      opacity: 0.8;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 0;
+    }
+  }
 }
 
 @layer base {
@@ -208,5 +245,22 @@
 
   .card-hotspot {
     @apply card-medical hover:border-warning/30 hover:shadow-[0_4px_20px_hsl(var(--warning)/0.15)];
+  }
+
+  /* Emergency Simulation Styles */
+  .ambulance-marker.dispatched {
+    animation: ambulance-dispatch 0.8s ease-in-out;
+  }
+
+  .ambulance-marker.en-route {
+    animation: ambulance-move 3s ease-in-out infinite alternate;
+  }
+
+  .emergency-marker {
+    animation: emergency-pulse 2s ease-in-out infinite;
+  }
+
+  .ambulance-route {
+    animation: route-fade 0.5s ease-in;
   }
 }

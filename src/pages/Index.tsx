@@ -5,6 +5,7 @@ import MapDashboard from '@/components/MapDashboard';
 import SidebarPanel from '@/components/SidebarPanel';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Ambulance {
   id: string;
@@ -266,7 +267,8 @@ const Index = () => {
   const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile); // Open by default on desktop
   const [showHighRiskOnly, setShowHighRiskOnly] = useState(false);
   const [showTraffic, setShowTraffic] = useState(true);
   const [simulationStarted, setSimulationStarted] = useState(false);
@@ -274,6 +276,13 @@ const Index = () => {
   const [overallTraffic, setOverallTraffic] = useState<string>('Loading...');
   const [activeEmergencies, setActiveEmergencies] = useState<Array<{id: string, lat: number, lng: number, hospital: Hospital}>>([]);
   const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
+  // Update sidebar state when switching between mobile/desktop
+  useEffect(() => {
+    if (!isMobile && !sidebarOpen) {
+      setSidebarOpen(true); // Always open on desktop
+    }
+  }, [isMobile, sidebarOpen]);
+
   const { toast } = useToast();
 
   // Calculate distance between two points (Haversine formula)

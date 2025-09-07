@@ -555,10 +555,10 @@ const MapDashboard: React.FC<MapDashboardProps> = ({
             <span className="text-muted-foreground">🏥 Private</span>
           </div>
         </div>
-      </div>
-        <p className="text-muted-foreground mt-1 text-[10px]">
-          Historical ambulance dispatch frequency
+        <p className="text-muted-foreground mt-2 text-[10px]">
+          Historical ambulance dispatch data
         </p>
+      </div>
     </div>
   </motion.div>
 );

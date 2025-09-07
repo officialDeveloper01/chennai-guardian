@@ -103,8 +103,10 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
       
       {/* Sidebar */}
       <motion.aside
-        initial={{ x: '100%' }}
-        animate={{ x: isOpen ? 0 : '100%' }}
+        initial={false}
+        animate={{ 
+          x: isOpen || !window.matchMedia('(max-width: 1023px)').matches ? 0 : '100%' 
+        }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
         className={`
           fixed lg:relative top-0 right-0 z-50 

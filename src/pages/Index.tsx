@@ -129,6 +129,8 @@ const Index = () => {
   const [simulationStarted, setSimulationStarted] = useState(false);
   const [selectedAmbulance, setSelectedAmbulance] = useState<Ambulance | null>(null);
   const [overallTraffic, setOverallTraffic] = useState<string>('Loading...');
+  const [activeEmergencies, setActiveEmergencies] = useState<Array<{id: string, lat: number, lng: number, hospital: Hospital}>>([]);
+  const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   // Calculate distance between two points (Haversine formula)
@@ -162,6 +164,97 @@ const Index = () => {
       distance: `${shortestDistance.toFixed(1)} km`
     };
   }, [calculateDistance]);
+
+  // Find nearest available ambulance to an emergency location
+  const findNearestAmbulance = useCallback((emergencyLat: number, emergencyLng: number): Ambulance | null => {
+    const availableAmbulances = ambulances.filter(amb => amb.status === 'Available');
+    if (availableAmbulances.length === 0) return null;
+
+    let nearestAmbulance = availableAmbulances[0];
+    let shortestDistance = calculateDistance(emergencyLat, emergencyLng, nearestAmbulance.lat, nearestAmbulance.lng);
+
+    for (const ambulance of availableAmbulances) {
+      const distance = calculateDistance(emergencyLat, emergencyLng, ambulance.lat, ambulance.lng);
+      if (distance < shortestDistance) {
+        shortestDistance = distance;
+        nearestAmbulance = ambulance;
+      }
+    }
+
+    return nearestAmbulance;
+  }, [ambulances, calculateDistance]);
+
+  // Generate random emergency location in Chennai
+  const generateRandomEmergency = useCallback(() => {
+    const chennaiArea = {
+      minLat: 12.9, maxLat: 13.2,
+      minLng: 80.1, maxLng: 80.35
+    };
+    
+    const lat = chennaiArea.minLat + Math.random() * (chennaiArea.maxLat - chennaiArea.minLat);
+    const lng = chennaiArea.minLng + Math.random() * (chennaiArea.maxLng - chennaiArea.minLng);
+    
+    return { lat, lng };
+  }, []);
+
+  // Start emergency simulation
+  const startSimulation = useCallback(() => {
+    if (simulationInterval) return;
+
+    toast({
+      title: "🚨 Emergency Simulation Started",
+      description: "Random emergencies will occur every 10-30 seconds",
+    });
+
+    const interval = setInterval(() => {
+      const emergency = generateRandomEmergency();
+      const nearestAmbulance = findNearestAmbulance(emergency.lat, emergency.lng);
+      
+      if (nearestAmbulance) {
+        const nearestHospital = findNearestHospital(emergency.lat, emergency.lng);
+        const emergencyId = `EMG${Date.now()}`;
+        
+        // Add to active emergencies
+        setActiveEmergencies(prev => [...prev, {
+          id: emergencyId,
+          lat: emergency.lat,
+          lng: emergency.lng,
+          hospital: nearestHospital
+        }]);
+
+        // Dispatch the ambulance
+        handleDispatchAmbulance(nearestAmbulance, emergency.lat, emergency.lng);
+
+        toast({
+          title: "🚨 Emergency Triggered",
+          description: `${nearestAmbulance.id} auto-dispatched to emergency location`,
+        });
+      } else {
+        toast({
+          title: "⚠️ No Available Ambulances",
+          description: "All ambulances are currently busy",
+          variant: "destructive"
+        });
+      }
+    }, Math.random() * 20000 + 10000); // 10-30 seconds
+
+    setSimulationInterval(interval);
+    setSimulationStarted(true);
+  }, [simulationInterval, generateRandomEmergency, findNearestAmbulance, findNearestHospital, toast]);
+
+  // Stop emergency simulation
+  const stopSimulation = useCallback(() => {
+    if (simulationInterval) {
+      clearInterval(simulationInterval);
+      setSimulationInterval(null);
+      setSimulationStarted(false);
+      
+      toast({
+        title: "🛑 Simulation Stopped",
+        description: "Emergency simulation has been stopped",
+      });
+    }
+  }, [simulationInterval, toast]);
 
   // Fetch traffic data from Google Maps API and assign ambulances to hotspots
   useEffect(() => {
@@ -262,27 +355,35 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [toast]);
 
-  const handleDispatchAmbulance = useCallback(async (ambulance: Ambulance) => {
+  const handleDispatchAmbulance = useCallback(async (ambulance: Ambulance, emergencyLat?: number, emergencyLng?: number) => {
     if (isLoading || ambulance.status !== 'Available') return;
     
     setIsLoading(true);
     
     try {
-      // Find nearest hospital to the ambulance location
-      const nearestHospital = findNearestHospital(ambulance.lat, ambulance.lng);
+      // Use emergency location if provided, otherwise use ambulance location
+      const targetLat = emergencyLat || ambulance.lat;
+      const targetLng = emergencyLng || ambulance.lng;
       
-      // Calculate ETA based on distance (assuming average city speed of 20 km/h)
-      const distanceKm = parseFloat(nearestHospital.distance!.replace(' km', ''));
-      const estimatedTime = Math.max(Math.round((distanceKm / 20) * 60), 3); // Minimum 3 minutes
+      // Find nearest hospital to the emergency/target location
+      const nearestHospital = findNearestHospital(targetLat, targetLng);
+      
+      // Calculate distance to emergency and then to hospital
+      const distanceToEmergency = emergencyLat ? calculateDistance(ambulance.lat, ambulance.lng, emergencyLat, emergencyLng) : 0;
+      const distanceToHospital = calculateDistance(targetLat, targetLng, nearestHospital.lat, nearestHospital.lng);
+      const totalDistance = distanceToEmergency + distanceToHospital;
+      
+      // Calculate ETA based on total distance (assuming average city speed of 25 km/h)
+      const estimatedTime = Math.max(Math.round((totalDistance / 25) * 60), 2); // Minimum 2 minutes
 
-      // Update ambulance status with hospital info
+      // Update ambulance status with hospital info and emergency route
       const updatedAmbulances = ambulances.map(amb =>
         amb.id === ambulance.id
           ? { 
               ...amb, 
               status: 'Dispatched' as const, 
               eta: `${estimatedTime} min to ${nearestHospital.name}`,
-              location: `En-route to ${nearestHospital.name}`,
+              location: emergencyLat ? `Responding to emergency → ${nearestHospital.name}` : `En-route to ${nearestHospital.name}`,
               hospital: nearestHospital
             }
           : amb
@@ -297,23 +398,121 @@ const Index = () => {
         successfulOutcomes: prev.successfulOutcomes + 1
       }));
 
-      // Simulate ambulance movement towards hospital
-      setTimeout(() => {
-        setAmbulances(prev => prev.map(amb => 
-          amb.id === ambulance.id
-            ? { 
-                ...amb, 
-                lat: nearestHospital.lat + (Math.random() - 0.5) * 0.001,
-                lng: nearestHospital.lng + (Math.random() - 0.5) * 0.001,
-                status: 'En-route' as const
+      // Simulate ambulance movement - first to emergency, then to hospital
+      let currentLat = ambulance.lat;
+      let currentLng = ambulance.lng;
+      
+      // If there's an emergency location, move there first
+      if (emergencyLat && emergencyLng) {
+        const steps = 5; // Number of animation steps
+        const latStep = (emergencyLat - currentLat) / steps;
+        const lngStep = (emergencyLng - currentLng) / steps;
+        
+        for (let i = 1; i <= steps; i++) {
+          setTimeout(() => {
+            currentLat += latStep;
+            currentLng += lngStep;
+            
+            setAmbulances(prev => prev.map(amb => 
+              amb.id === ambulance.id
+                ? { 
+                    ...amb, 
+                    lat: currentLat,
+                    lng: currentLng,
+                    status: i < steps ? 'En-route' as const : 'On Duty' as const
+                  }
+                : amb
+            ));
+          }, i * 1000); // 1 second intervals
+        }
+        
+        // After reaching emergency, move to hospital
+        setTimeout(() => {
+          const hospitalSteps = 5;
+          const hospitalLatStep = (nearestHospital.lat - emergencyLat) / hospitalSteps;
+          const hospitalLngStep = (nearestHospital.lng - emergencyLng) / hospitalSteps;
+          
+          for (let i = 1; i <= hospitalSteps; i++) {
+            setTimeout(() => {
+              const newLat = emergencyLat + (hospitalLatStep * i);
+              const newLng = emergencyLng + (hospitalLngStep * i);
+              
+              setAmbulances(prev => prev.map(amb => 
+                amb.id === ambulance.id
+                  ? { 
+                      ...amb, 
+                      lat: newLat,
+                      lng: newLng,
+                      status: 'En-route' as const,
+                      location: `Transporting to ${nearestHospital.name}`
+                    }
+                  : amb
+              ));
+              
+              // Complete the mission at hospital
+              if (i === hospitalSteps) {
+                setTimeout(() => {
+                  setAmbulances(prev => prev.map(amb => 
+                    amb.id === ambulance.id
+                      ? { 
+                          ...amb, 
+                          status: 'Available' as const,
+                          location: `Available near ${nearestHospital.name}`,
+                          eta: undefined,
+                          hospital: undefined
+                        }
+                      : amb
+                  ));
+                  
+                  setMetrics(prev => ({
+                    ...prev,
+                    activeEmergencies: Math.max(0, prev.activeEmergencies - 1)
+                  }));
+                }, 2000);
               }
-            : amb
-        ));
-      }, 2000);
+            }, i * 1500); // 1.5 second intervals
+          }
+        }, steps * 1000 + 3000); // Wait for emergency response + 3 seconds
+      } else {
+        // Direct hospital route
+        const steps = 8;
+        const latStep = (nearestHospital.lat - currentLat) / steps;
+        const lngStep = (nearestHospital.lng - currentLng) / steps;
+        
+        for (let i = 1; i <= steps; i++) {
+          setTimeout(() => {
+            currentLat += latStep;
+            currentLng += lngStep;
+            
+            setAmbulances(prev => prev.map(amb => 
+              amb.id === ambulance.id
+                ? { 
+                    ...amb, 
+                    lat: currentLat,
+                    lng: currentLng,
+                    status: i < steps ? 'En-route' as const : 'Available' as const,
+                    location: i < steps ? `En-route to ${nearestHospital.name}` : `Available near ${nearestHospital.name}`,
+                    eta: i >= steps ? undefined : amb.eta,
+                    hospital: i >= steps ? undefined : amb.hospital
+                  }
+                : amb
+            ));
+            
+            if (i === steps) {
+              setMetrics(prev => ({
+                ...prev,
+                activeEmergencies: Math.max(0, prev.activeEmergencies - 1)
+              }));
+            }
+          }, i * 1200); // 1.2 second intervals
+        }
+      }
 
       toast({
         title: "🚑 Ambulance Dispatched",
-        description: `${ambulance.id} dispatched to ${nearestHospital.name} (ETA: ${estimatedTime} min)`,
+        description: emergencyLat 
+          ? `${ambulance.id} responding to emergency → ${nearestHospital.name}` 
+          : `${ambulance.id} dispatched to ${nearestHospital.name} (ETA: ${estimatedTime} min)`,
       });
     } catch (error) {
       console.error('Error dispatching ambulance:', error);
@@ -325,7 +524,7 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, ambulances, toast, findNearestHospital]);
+  }, [isLoading, ambulances, toast, findNearestHospital, calculateDistance]);
 
   const handleAmbulanceSelect = useCallback((ambulance: Ambulance) => {
     setSelectedAmbulance(ambulance);
@@ -350,6 +549,15 @@ const Index = () => {
     });
   }, [showHighRiskOnly, toast]);
 
+  // Cleanup simulation on unmount
+  useEffect(() => {
+    return () => {
+      if (simulationInterval) {
+        clearInterval(simulationInterval);
+      }
+    };
+  }, [simulationInterval]);
+
   return (
     <div className="h-screen w-full bg-background overflow-hidden">
       {/* Header */}
@@ -357,6 +565,9 @@ const Index = () => {
         isLoading={isLoading}
         activeEmergencies={metrics.activeEmergencies}
         overallTraffic={overallTraffic}
+        onStartSimulation={startSimulation}
+        onStopSimulation={stopSimulation}
+        simulationStarted={simulationStarted}
       />
 
       {/* Main Content */}
@@ -378,6 +589,7 @@ const Index = () => {
             showTraffic={showTraffic}
             showHighRiskOnly={showHighRiskOnly}
             simulationStarted={simulationStarted}
+            activeEmergencies={activeEmergencies}
           />
           
           {/* Floating Action Button */}

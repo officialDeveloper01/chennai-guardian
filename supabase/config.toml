@@ -1,0 +1,22 @@
+project_id = "negmvyuowzqobzpidpbn"
+
+[functions.route]
+verify_jwt = false
+
+[functions.weather]
+verify_jwt = false
+
+[functions.events]
+verify_jwt = false
+
+[functions.traffic]
+verify_jwt = false
+
+[functions.hotspot-prediction]
+verify_jwt = false
+
+[functions.emergencies]
+verify_jwt = false
+
+[functions.dispatch-ambulance]
+verify_jwt = false

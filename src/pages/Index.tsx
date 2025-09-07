@@ -749,7 +749,7 @@ const Index = () => {
   }, [simulationInterval]);
 
   return (
-    <div className="h-screen w-full bg-background overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden bg-background">
       {/* Header */}
       <HeaderPanel
         isLoading={isLoading}
@@ -758,17 +758,18 @@ const Index = () => {
         onStartSimulation={startSimulation}
         onStopSimulation={stopSimulation}
         simulationStarted={simulationStarted}
+        ambulances={ambulances}
+        hotspots={hotspots}
+        showHighRiskOnly={showHighRiskOnly}
+        onToggleFilter={handleToggleFilter}
+        onAmbulanceSelect={handleAmbulanceSelect}
+        onHotspotSelect={handleHotspotSelect}
       />
 
-      {/* Main Content */}
-      <div className="flex h-[calc(100vh-80px)]">
-        {/* Map Section */}
-        <motion.div 
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex-1 relative"
-        >
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Map Dashboard - Full width on all screens */}
+        <div className="flex-1 relative w-full">
           <MapDashboard
             ambulances={ambulances}
             hotspots={hotspots}
@@ -788,20 +789,22 @@ const Index = () => {
             showHighRiskOnly={showHighRiskOnly}
             onToggle={handleToggleFilter}
           />
-        </motion.div>
+        </div>
 
-        {/* Sidebar Panel */}
-        <SidebarPanel
-          ambulances={ambulances}
-          hotspots={hotspots}
-          showHighRiskOnly={showHighRiskOnly}
-          onToggleFilter={handleToggleFilter}
-          onAmbulanceSelect={handleAmbulanceSelect}
-          onHotspotSelect={handleHotspotSelect}
-        />
+        {/* Desktop Right Sidebar - Hidden on mobile/tablet */}
+        <div className="hidden xl:block">
+          <SidebarPanel
+            ambulances={ambulances}
+            hotspots={hotspots}
+            showHighRiskOnly={showHighRiskOnly}
+            onToggleFilter={handleToggleFilter}
+            onAmbulanceSelect={handleAmbulanceSelect}
+            onHotspotSelect={handleHotspotSelect}
+          />
+        </div>
       </div>
-      
-      {/* Bottom Metrics */}
+
+      {/* Bottom Metrics Panel */}
       <MetricsPanel metrics={metrics} />
     </div>
   );

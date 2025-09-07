@@ -91,7 +91,7 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
       initial={{ opacity: 0, x: 300 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.6, delay: 0.2 }}
-      className="w-80 bg-card border-l border-border flex flex-col overflow-hidden"
+      className="w-80 bg-card border-l border-border flex flex-col overflow-hidden h-full"
     >
       {/* Ambulance Fleet Section */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -105,19 +105,19 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
           </h2>
         </div>
 
-        <div className="space-y-3">
-          {ambulances.map((ambulance, index) => (
-            <motion.div
-              key={ambulance.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+      <div className="space-y-2 md:space-y-3">
+        {ambulances.map((ambulance, index) => (
+          <motion.div
+            key={ambulance.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-all duration-300 hover:border-primary/50 touch-manipulation"
+              onClick={() => onAmbulanceSelect(ambulance)}
             >
-              <Card 
-                className="cursor-pointer hover:shadow-md transition-all duration-300 hover:border-primary/50"
-                onClick={() => onAmbulanceSelect(ambulance)}
-              >
-                <CardContent className="p-4">
+              <CardContent className="p-3 md:p-4">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold">{ambulance.id}</h3>
                     <Badge variant={getStatusBadgeVariant(ambulance.status)}>
@@ -191,7 +191,7 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
           </Button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           {filteredHotspots.map((hotspot, index) => (
             <motion.div
               key={hotspot.id}
@@ -200,10 +200,10 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
               transition={{ delay: index * 0.1 }}
             >
               <Card 
-                className="cursor-pointer hover:shadow-md transition-all duration-300 hover:border-primary/50"
+                className="cursor-pointer hover:shadow-md transition-all duration-300 hover:border-primary/50 touch-manipulation"
                 onClick={() => onHotspotSelect(hotspot)}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 md:p-4">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-sm">{hotspot.name}</h3>
                     <div className={`w-3 h-3 rounded-full ${

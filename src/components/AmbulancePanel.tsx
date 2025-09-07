@@ -195,7 +195,7 @@ const AmbulancePanel: React.FC<AmbulancePanelProps> = ({
             <div className="font-bold text-primary">{ambulances.filter(a => a.status === 'Dispatched').length}</div>
             <div className="text-muted-foreground">Dispatched</div>
           </div>
-        </div>
+         </div>
       </motion.div>
     </motion.div>
   );

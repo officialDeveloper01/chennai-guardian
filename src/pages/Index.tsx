@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import HeaderPanel from '@/components/HeaderPanel';
 import MapDashboard from '@/components/MapDashboard';
-import MetricsPanel from '@/components/MetricsPanel';
 import SidebarPanel from '@/components/SidebarPanel';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import { useToast } from '@/hooks/use-toast';
@@ -262,20 +261,12 @@ const chennaiHospitals: Hospital[] = [
   }
 ];
 
-const initialMetrics = {
-  averageResponseTime: 8.5,
-  activeEmergencies: 0,
-  improvementPercentage: 15,
-  totalDispatches: 0,
-  successfulOutcomes: 0,
-  avgTimeToDispatch: 120
-};
 
 const Index = () => {
   const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
-  const [metrics, setMetrics] = useState(initialMetrics);
   const [isLoading, setIsLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showHighRiskOnly, setShowHighRiskOnly] = useState(false);
   const [showTraffic, setShowTraffic] = useState(true);
   const [simulationStarted, setSimulationStarted] = useState(false);
@@ -581,12 +572,6 @@ const Index = () => {
 
       setAmbulances(updatedAmbulances);
       setSelectedAmbulance(null); // Clear selection after dispatch
-      setMetrics(prev => ({
-        ...prev,
-        activeEmergencies: prev.activeEmergencies + 1,
-        totalDispatches: prev.totalDispatches + 1,
-        successfulOutcomes: prev.successfulOutcomes + 1
-      }));
 
       // Simulate ambulance movement - first to emergency, then to hospital
       let currentLat = ambulance.lat;
@@ -653,11 +638,6 @@ const Index = () => {
                         }
                       : amb
                   ));
-                  
-                  setMetrics(prev => ({
-                    ...prev,
-                    activeEmergencies: Math.max(0, prev.activeEmergencies - 1)
-                  }));
                 }, 2000);
               }
             }, i * 1500); // 1.5 second intervals
@@ -689,10 +669,7 @@ const Index = () => {
             ));
             
             if (i === steps) {
-              setMetrics(prev => ({
-                ...prev,
-                activeEmergencies: Math.max(0, prev.activeEmergencies - 1)
-              }));
+              // Animation complete
             }
           }, i * 1200); // 1.2 second intervals
         }
@@ -753,7 +730,7 @@ const Index = () => {
       {/* Header */}
       <HeaderPanel
         isLoading={isLoading}
-        activeEmergencies={metrics.activeEmergencies}
+        activeEmergencies={activeEmergencies.length}
         overallTraffic={overallTraffic}
         onStartSimulation={startSimulation}
         onStopSimulation={stopSimulation}
@@ -764,6 +741,8 @@ const Index = () => {
         onToggleFilter={handleToggleFilter}
         onAmbulanceSelect={handleAmbulanceSelect}
         onHotspotSelect={handleHotspotSelect}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        sidebarOpen={sidebarOpen}
       />
 
       {/* Main Content Area */}
@@ -791,21 +770,18 @@ const Index = () => {
           />
         </div>
 
-        {/* Desktop Right Sidebar - Hidden on mobile/tablet */}
-        <div className="hidden xl:block">
-          <SidebarPanel
-            ambulances={ambulances}
-            hotspots={hotspots}
-            showHighRiskOnly={showHighRiskOnly}
-            onToggleFilter={handleToggleFilter}
-            onAmbulanceSelect={handleAmbulanceSelect}
-            onHotspotSelect={handleHotspotSelect}
-          />
-        </div>
+        {/* Collapsible Sidebar - All screen sizes */}
+        <SidebarPanel
+          ambulances={ambulances}
+          hotspots={hotspots}
+          showHighRiskOnly={showHighRiskOnly}
+          onToggleFilter={handleToggleFilter}
+          onAmbulanceSelect={handleAmbulanceSelect}
+          onHotspotSelect={handleHotspotSelect}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
       </div>
-
-      {/* Bottom Metrics Panel */}
-      <MetricsPanel metrics={metrics} />
     </div>
   );
 };

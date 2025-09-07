@@ -51,6 +51,8 @@ interface HeaderPanelProps {
   onToggleFilter: () => void;
   onAmbulanceSelect: (ambulance: Ambulance) => void;
   onHotspotSelect: (hotspot: Hotspot) => void;
+  onToggleSidebar: () => void;
+  sidebarOpen: boolean;
 }
 
 const HeaderPanel: React.FC<HeaderPanelProps> = ({
@@ -63,9 +65,11 @@ const HeaderPanel: React.FC<HeaderPanelProps> = ({
   ambulances,
   hotspots,
   showHighRiskOnly,
-  onToggleFilter,
+  onToggleFilter,  
   onAmbulanceSelect,
-  onHotspotSelect
+  onHotspotSelect,
+  onToggleSidebar,
+  sidebarOpen
 }) => {
   const { weather, loading: loadingWeather } = useWeather({ city: 'Chennai' });
   const isMobile = useIsMobile();
@@ -119,6 +123,8 @@ const HeaderPanel: React.FC<HeaderPanelProps> = ({
                   onHotspotSelect(hotspot);
                   setIsMenuOpen(false);
                 }}
+                isOpen={true}
+                onClose={() => setIsMenuOpen(false)}
               />
             </SheetContent>
           </Sheet>

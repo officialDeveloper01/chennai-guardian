@@ -7,7 +7,8 @@ import {
   Phone, 
   Filter,
   AlertTriangle,
-  TrendingUp
+  TrendingUp,
+  X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,8 @@ interface SidebarPanelProps {
   onToggleFilter: () => void;
   onAmbulanceSelect: (ambulance: Ambulance) => void;
   onHotspotSelect: (hotspot: Hotspot) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const SidebarPanel: React.FC<SidebarPanelProps> = ({
@@ -60,7 +63,9 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
   showHighRiskOnly,
   onToggleFilter,
   onAmbulanceSelect,
-  onHotspotSelect
+  onHotspotSelect,
+  isOpen,
+  onClose
 }) => {
   const filteredHotspots = showHighRiskOnly 
     ? hotspots.filter(hotspot => hotspot.category === 'high')
@@ -87,23 +92,47 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
   };
 
   return (
-    <motion.aside
-      initial={{ opacity: 0, x: 300 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.6, delay: 0.2 }}
-      className="w-80 bg-card border-l border-border flex flex-col overflow-hidden h-full"
-    >
-      {/* Ambulance Fleet Section */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Ambulance className="h-5 w-5 text-primary" />
-            Fleet Status
-            <Badge variant="outline" className="ml-2">
-              {ambulances.length}
-            </Badge>
-          </h2>
+    <>
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <motion.aside
+        initial={{ x: '100%' }}
+        animate={{ x: isOpen ? 0 : '100%' }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className={`
+          fixed lg:relative top-0 right-0 z-50 
+          w-80 bg-card border-l border-border 
+          flex flex-col overflow-hidden h-full
+          lg:translate-x-0 lg:block
+          ${isOpen ? 'block' : 'hidden lg:block'}
+        `}
+      >
+        {/* Header with close button */}
+        <div className="flex items-center justify-between p-4 border-b border-border lg:hidden">
+          <h2 className="text-lg font-semibold">Dashboard</h2>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
         </div>
+
+        {/* Ambulance Fleet Section */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Ambulance className="h-5 w-5 text-primary" />
+              Fleet Status
+              <Badge variant="outline" className="ml-2">
+                {ambulances.length}
+              </Badge>
+            </h2>
+          </div>
 
       <div className="space-y-2 md:space-y-3">
         {ambulances.map((ambulance, index) => (
@@ -226,9 +255,10 @@ const SidebarPanel: React.FC<SidebarPanelProps> = ({
               </Card>
             </motion.div>
           ))}
+          </div>
         </div>
-      </div>
-    </motion.aside>
+      </motion.aside>
+    </>
   );
 };
 
